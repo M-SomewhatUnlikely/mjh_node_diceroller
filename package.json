@@ -1,0 +1,19 @@
+{
+  "name": "mjh_node_diceroller",
+  "version": "0.0.1",
+  "description": "Yet another dice rolling library",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M-SomewhatUnlikely/mjh_node_diceroller.git"
+  },
+  "author": "Matthew Holland",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/M-SomewhatUnlikely/mjh_node_diceroller/issues"
+  },
+  "homepage": "https://github.com/M-SomewhatUnlikely/mjh_node_diceroller#readme"
+}
