@@ -31,6 +31,7 @@ The flags aren't yet implemented; this is design doc so far.
 Each flag is one character or symbol, optionally followed by one or more digit of integer.
 
 | Char | Number? | Effect |
+| ---- | ------- | ------ |
 | > | Required | Rather than adding the dice, it counts how many are at least equal to this target number (note: not strictly exceed as the notation might suggest; the non-strict inequality is the more common use case). Note that the total of the term is the number of successes, meaning that you'll often want this to be the only term. |
 | < | Required | As '>', but successes are those that are less than or equal to the number |
 | x | Optional | Each die that rolls maximum explodes, adding another die of the same kind. |
