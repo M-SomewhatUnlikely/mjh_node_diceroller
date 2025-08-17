@@ -8,9 +8,12 @@ Three main stages:
 
 - Basic dice and constants. I think this is working, but I need to hook it up to something.
 - Flags, far enough to get '>' working, since that's a major use case for me. That's next.
+- Keywords for particular systems dice mechanics.
+
+Around or after the above, some smaller milestones:
+
 - More Flags
 - Dice types (Fate or Fudge?) using letters other than 'd'.
-- Keywords for particular systems dice mechanics.
 
 ## General Dice
 
