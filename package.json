@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/M-SomewhatUnlikely/mjh_node_diceroller/issues"
   },
-  "homepage": "https://github.com/M-SomewhatUnlikely/mjh_node_diceroller#readme"
+  "homepage": "https://github.com/M-SomewhatUnlikely/mjh_node_diceroller#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
