@@ -98,7 +98,7 @@ function parse(input) {
         }
     });
 
-    out.summary = `Got {total} on {input}`;
+    out.summary = `Got ${out.total} on ${out.input}`;
 
     return out;
 }
