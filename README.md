@@ -38,7 +38,7 @@ Because there's competition for sensible characters to use, they're case sensiti
 | < | Default 1 | As '>', but successes are those that are less than or equal to the number |
 | = | Default s | As '=', but successes are those that are exactly equal to the number. Not at all useful (doesn't matter what 'm' is; same success probabilities as '>' with 's'), but I could implement it while I'm there. |
 | x | Default no limit | Each die that rolls maximum explodes, adding another die of the same kind. The optional number is the maximum additional dice, default unlimited. |
-| H | Default 1 | D&D character gen: Keep the highest 'm' dice. m=1 returns max(roll), which may be useful in some systems. |
+| H | Default 1 | Keep the highest 'm' dice (like mid-old D&D character gen). m=1 returns max(roll), which may be useful in some systems. |
 | L | Default 1 | Keep the lowest 'm' dice. m=1 returns min(roll). |
 | l | Default 1 | [Lower case L]: Lose the highest 'm' dice. |
 | h | Default 1 | Lose the lowest 'm' dice; 4d6h1 = 4d6H3 |

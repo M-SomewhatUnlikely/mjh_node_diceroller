@@ -34,6 +34,7 @@ function parse(input) {
     // console.log(terms);
 
     var out = {
+        summary: "",
         input: input,
         total: 0,
         errors: [],
@@ -96,6 +97,8 @@ function parse(input) {
                 + ", which did not match the pattern for a constant or dice term");
         }
     });
+
+    out.summary = `Got {total} on {input}`;
 
     return out;
 }
