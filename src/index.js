@@ -11,7 +11,9 @@ function signedInt(i) {
     return i < 0 ? i : "+" + i;
 }
 
-function parse(input) {
+function doString(input, verbose) {
+    console.log(verbose);
+
     // Strip whitespace
     var str = input.replace(/\s/g, "");
 
@@ -28,10 +30,6 @@ function parse(input) {
 
     // Finally split on space
     var terms = str.split(" ");
-
-    //    terms = terms.filter(s => s.length > 0);
-
-    // console.log(terms);
 
     var out = {
         summary: "",
@@ -58,8 +56,6 @@ function parse(input) {
                 out.total -= parseInt(core);
             }
         } else if (matches.length > 0) {
-            // console.log(matches[0]);
-
             var count = matches[0].groups["dicecount"];
             var sides = matches[0].groups["dicesides"];
             var flag_chararray = matches[0].groups["flags"].split();
@@ -74,7 +70,6 @@ function parse(input) {
             });
 
             var subtotal = 0;
-            //                out.terms.push(sign + core);
             for (var i = 0; i < count; i++) {
                 var roll = randInt(sides);
                 rolls.push(roll);
@@ -87,8 +82,12 @@ function parse(input) {
             }
             out.terms.push(
                 sign + count + "d" + sides
-                + " [" + rolls.join(",") + "]: "
-                + signedInt(subtotal)
+                + " (" + signedInt(subtotal)
+                + (verbose
+                    ? ": [" + rolls.join(",") + "]"
+                    : "")
+                + ")"
+                
             );
             out.total += subtotal;
         } else {
@@ -98,9 +97,37 @@ function parse(input) {
         }
     });
 
-    out.summary = `Got ${out.total} on ${out.input}`;
+    out.summary = `Rolled ${out.total} on ${out.terms.join(" ")}.`;
 
     return out;
+}
+
+const types = [
+    {
+        flags: ["v", "verbose"],
+        run: args => { return doString(args.join(" "), true); },
+    },
+];
+
+function parse(input) {
+    var args = input.trim().split(" ");
+
+    // Check the first argument against the flags of all the types
+    for (const t of types) { 
+        if (t.flags.includes(args[0])) {
+            if (t.run) {
+                return t.run(args.slice(1));
+            }
+            else {
+                return {
+                    summary: `Dice type ${args[0]} not yet implemented. Tell Matthew.`,
+                    error: `Dice type ${args[0]} not yet implemented. Tell Matthew.`,
+                };
+            }
+        }
+    }
+    // None of the types matched the first argument: try the whole string
+    return doString(args.join(" "), false);
 }
 
 module.exports = {
