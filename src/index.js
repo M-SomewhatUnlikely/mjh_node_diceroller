@@ -1,6 +1,3 @@
-
-// const re = /(?<plusminus>[+-]?)((?<diecount>\d*)d(?<diesize>\d+)|(?<constant>\d+)[$^\d])/g
-
 const flags = [
     {
         nyi: true,
@@ -86,17 +83,17 @@ const commands = [
     {
         keys: ["v", "verbose"],
         run: args => doString(args.join(" "), true),
-        help: "v <dicestring> - verbose: return slightly more result information."
+        help: "`v <dicestring>` - verbose: return slightly more result information."
     },
     {
         keys: ["h", "help"],
         run: args => getHelp(false),
-        help: "h - this help."
+        help: "`h` - this help."
     },
     {
         keys: ['roadmap'],
         run: args => getHelp(true),
-        help: "roadmap - the help, including things that are not yet implemented (NYI)."
+        help: "`roadmap` - the help, including things that are not yet implemented (NYI)."
     }
 ];
 
@@ -201,20 +198,20 @@ function doString(input, verbose) {
 
 function getHelp(roadmap) {
     var help = "Usage: normally a dice string (like '2d6 + 3d3 - 12')."
-    help += "\nOptionally, one of the command arguments, which might change the arguments needed:"
+    help += "\n\nOptionally, one of the command arguments, which might change the arguments needed:"
     commands.forEach(c => {
         if (c.help && (!c.nyi || roadmap)) {
             help += "\n- " + c.help;
         }
     });
-    help += "\nDice string terms can be constant numbers, or `n`[d]`s` for one of the following letters:"
+    help += "\n\nDice string terms can be constant numbers, or `n`[d]`s` for one of the following letters:"
     dietypes.forEach(c => {
         if (c.help && (!c.nyi || roadmap)) {
             help += "\n- " + c.help;
         }
     });
-    help += "\nDice terms may be followed by one or more flags, like `n`d`s`f2, with or without the number:"
-    dietypes.forEach(c => {
+    help += "\n\nDice terms may be followed by one or more flags, like `n`d`s`f2, with or without the number:"
+    flags.forEach(c => {
         if (c.help && (!c.nyi || roadmap)) {
             help += "\n- " + c.help;
         }
