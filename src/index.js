@@ -1,6 +1,105 @@
 
 // const re = /(?<plusminus>[+-]?)((?<diecount>\d*)d(?<diesize>\d+)|(?<constant>\d+)[$^\d])/g
 
+const flags = [
+    {
+        nyi: true,
+        keys: [">"],
+        help: ">`m` - NYI: Turns the dice into a success test, returning the number"
+            + " of dice that are at least (**not** strictly greater than) `m` (default max)."
+    },
+    {
+        nyi: true,
+        keys: ["<"],
+        help: "<`m` - NYI: Turns the dice into a success test, returning the number"
+            + " of dice that are at most (**not** strictly less than) `m` (default 1)."
+    },
+    {
+        nyi: true,
+        keys: ["="],
+        help: "=`m` - NYI: Turns the dice into a success test, returning the number"
+            + " of dice that are equal to `m` (default max)."
+    },
+    {
+        nyi: true,
+        keys: ["x"],
+        help: "x`m` - NYI: Dice explode, adding an extra die for each max score. Limited to `m` bonus per die (default 0 = no limit)."
+    },
+    {
+        nyi: true,
+        keys: ["X"],
+        help: "X`m` - NYI: Dice explode, adding an extra die for each score of `m` or more (default max)."
+            + " Combine X and x to specify the explosion threshold and a limit, respectively."
+    },
+    {
+        nyi: true,
+        keys: ["H"],
+        help: "H`m` - NYI: Keep the highest `m` dice (default 1). This is done before counting doubles or other distribution checking."
+    },
+    {
+        nyi: true,
+        keys: ["L"],
+        help: "L`m` - NYI: Keep the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking."
+    },
+    {
+        nyi: true,
+        keys: ["h"],
+        help: "h`m` - NYI: Remove the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking."
+    },
+    {
+        nyi: true,
+        keys: ["l", "c"],
+        help: "l`m` or c`m` - NYI: 'Cut': Remove the highest `m` dice (default 1). This is done before counting doubles or other distribution checking."
+    },
+    {
+        nyi: true,
+        keys: ["d"],
+        help: "d`m` - NYI: Make a fuss if there are doubles (by default)."
+    },
+];
+
+const dietypes = [
+    {
+        keys: ["d"],
+        help: "`n`d`s` - Report the total/sum of `n` normal dice of `s` sides each."
+    }
+    {
+        nyi: true,
+        keys: ["b"],
+        help: "`n`b`s` - Report how many of `n`d`s` meed the success condition: use <, > or = flags (default >`s`)."
+            + " Note that 'd' also supports those flags for compatibility, so this is almost an alias."
+    },
+    {
+        nyi: true,
+        keys: ["h"],
+        help: "`n`h`s` - `n` dice, reporting only the highest score."
+            + " Note that 3h6c2 reports highest score after cut2, but 3d6c2H1 might not do the flags in the right order."
+    },
+    {
+        nyi: true,
+        keys: ["l"],
+        help: "`n`l`s` - `n` dice, reporting only the lowest score."
+    },
+];
+
+const commands = [
+    {
+        keys: ["v", "verbose"],
+        run: args => { return doString(args.join(" "), true); },
+        help: "v <dicestring> - verbose: return slightly more result information."
+    },
+    {
+        keys: ["h", "help"],
+        run: args => getHelp(false);
+        help: "h - this help."
+    },
+    {
+        keys: ['roadmap'],
+        run: args => getHelp(true);
+        help: "roadmap - the help, including things that are not yet implemented (NYI)."
+    }
+];
+
 const re_constant = /^\d$/g;
 const re_diceterm = /^(?<dicecount>\d*)d(?<dicesides>\d+)(?<flags>(\w\d*)*)$/g;
 
@@ -85,7 +184,7 @@ function doString(input, verbose) {
                     ? ": [" + rolls.join(",") + "]"
                     : "")
                 + ")"
-                
+
             );
             out.total += subtotal;
         } else {
@@ -100,41 +199,42 @@ function doString(input, verbose) {
     return out;
 }
 
-const commands = [
-    {
-        keys: ["v", "verbose"],
-        run: args => { return doString(args.join(" "), true); },
-        help: "v <dicestring> - verbose: return slightly more result information."
-    },
-    {
-        keys: ["h", "help"],
-        run: args => {
-            var help = "Usage: normally a dice string (like '2d6 + 3d3 - 12' or whatever."
-            help += "\nOptionally, one of the command arguments, which might change the arguments needed:"
-            commands.forEach(c => {
-                if (c.help) {
-                    help += "\n- " + c.help;
-                }
-            });
-            return { summary: help };
-        },
-        help: "h - this help."
-    }
-];
+function getHelp(roadmap) {
+    var help = "Usage: normally a dice string (like '2d6 + 3d3 - 12')."
+    help += "\nOptionally, one of the command arguments, which might change the arguments needed:"
+    commands.forEach(c => {
+        if (c.help && (!c.nyi || roadmap)) {
+            help += "\n- " + c.help;
+        }
+    });
+    help += "\nDice string terms can be constant numbers, or `n`[d]`s` for one of the following letters:"
+    dietypes.forEach(c => {
+        if (c.help && (!c.nyi || roadmap)) {
+            help += "\n- " + c.help;
+        }
+    });
+    help += "\nDice terms may be followed by one or more flags, like `n`d`s`f2, with or without the number:"
+    dietypes.forEach(c => {
+        if (c.help && (!c.nyi || roadmap)) {
+            help += "\n- " + c.help;
+        }
+    });
+    return { help: help };
+}
 
 function parse(input) {
     var args = input.trim().split(" ");
 
     // Check the first argument against the flags of all the commands
-    for (const t of commands) { 
+    for (const t of commands) {
         if (t.keys.includes(args[0])) {
             if (t.run) {
                 return t.run(args.slice(1));
             }
             else {
                 return {
-                    summary: `Dice type ${args[0]} not yet implemented. Tell Matthew.`,
-                    error: `Dice type ${args[0]} not yet implemented. Tell Matthew.`,
+                    summary: `Command ${args[0]} not yet implemented. Tell Matthew.`,
+                    error: `Command ${args[0]} not yet implemented. Tell Matthew.`,
                 };
             }
         }
