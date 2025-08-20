@@ -5,7 +5,8 @@ var p = require("./src/index.js").parse;
     "v 2d8 - 3d4 + 5",
     "2d6x3v2",
     "2r4",
-    "h"
+    "h",
+    "roadmap"
 ].forEach(s => {
     const data = p(s);
     console.log("\n === s = " + s);

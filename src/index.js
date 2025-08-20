@@ -197,25 +197,29 @@ function doString(input, verbose) {
 }
 
 function getHelp(roadmap) {
-    var help = "Usage: normally a dice string (like '2d6 + 3d3 - 12')."
-    help += "\n\nOptionally, one of the command arguments, which might change the arguments needed:"
+    var help = [];
+    var s = "Usage: `!roll` or `!r`, normally a dice string (like '2d6 + 3d3 - 12')."
+    s += "\n\nOptionally, one of the command arguments, which might change the arguments needed:"
     commands.forEach(c => {
         if (c.help && (!c.nyi || roadmap)) {
-            help += "\n- " + c.help;
+            s += "\n- " + c.help;
         }
     });
-    help += "\n\nDice string terms can be constant numbers, or `n`[d]`s` for one of the following letters:"
+    help.push(s);
+    var s = "Dice string terms can be constant numbers, or `n`[d]`s` for one of the following letters:"
     dietypes.forEach(c => {
         if (c.help && (!c.nyi || roadmap)) {
-            help += "\n- " + c.help;
+            s += "\n- " + c.help;
         }
     });
-    help += "\n\nDice terms may be followed by one or more flags, like `n`d`s`f2, with or without the number:"
+    help.push(s);
+    var s = "Dice terms may be followed by one or more flags, like `n`d`s`f2, with or without the number:"
     flags.forEach(c => {
         if (c.help && (!c.nyi || roadmap)) {
-            help += "\n- " + c.help;
+            s += "\n- " + c.help;
         }
     });
+    help.push(s);
     return { help: help };
 }
 
