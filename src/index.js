@@ -12,8 +12,6 @@ function signedInt(i) {
 }
 
 function doString(input, verbose) {
-    console.log(verbose);
-
     // Strip whitespace
     var str = input.replace(/\s/g, "");
 
@@ -102,19 +100,34 @@ function doString(input, verbose) {
     return out;
 }
 
-const types = [
+const commands = [
     {
-        flags: ["v", "verbose"],
+        keys: ["v", "verbose"],
         run: args => { return doString(args.join(" "), true); },
+        help: "v <dicestring> - verbose: return slightly more result information."
     },
+    {
+        keys: ["h", "help"],
+        run: args => {
+            var help = "Usage: normally a dice string (like '2d6 + 3d3 - 12' or whatever."
+            help += "\nOptionally, one of the command arguments, which might change the arguments needed:"
+            commands.forEach(c => {
+                if (c.help) {
+                    help += "\n- " + c.help;
+                }
+            });
+            return { summary: help };
+        },
+        help: "h - this help."
+    }
 ];
 
 function parse(input) {
     var args = input.trim().split(" ");
 
-    // Check the first argument against the flags of all the types
-    for (const t of types) { 
-        if (t.flags.includes(args[0])) {
+    // Check the first argument against the flags of all the commands
+    for (const t of commands) { 
+        if (t.keys.includes(args[0])) {
             if (t.run) {
                 return t.run(args.slice(1));
             }
