@@ -62,7 +62,7 @@ const dietypes = [
     {
         keys: ["d"],
         help: "`n`d`s` - Report the total/sum of `n` normal dice of `s` sides each."
-    }
+    },
     {
         nyi: true,
         keys: ["b"],
@@ -85,17 +85,17 @@ const dietypes = [
 const commands = [
     {
         keys: ["v", "verbose"],
-        run: args => { return doString(args.join(" "), true); },
+        run: args => doString(args.join(" "), true),
         help: "v <dicestring> - verbose: return slightly more result information."
     },
     {
         keys: ["h", "help"],
-        run: args => getHelp(false);
+        run: args => getHelp(false),
         help: "h - this help."
     },
     {
         keys: ['roadmap'],
-        run: args => getHelp(true);
+        run: args => getHelp(true),
         help: "roadmap - the help, including things that are not yet implemented (NYI)."
     }
 ];
