@@ -1,12 +1,14 @@
 var p = require("./src/index.js").parse;
 
 [
-    "2d6 + 1",
+    "v 2d6 + 1",
     "v 2d8 - 3d4 + 5",
-    "2d6x3v2",
+    "v 2d6x3>5",
     "2r4",
-    "h",
-    "roadmap"
+    "v 2h4>2",
+    "v 2d6 + 2h6"
+ //   "h",
+ //   "roadmap"
 ].forEach(s => {
     const data = p(s);
     console.log("\n === s = " + s);
