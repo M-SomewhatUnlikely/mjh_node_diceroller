@@ -97,6 +97,7 @@ function doString(input, verbose) {
 
             // Make flag dict:
             var flag_dict = {}
+            var flag_display = []
             var current_flag = "";
             var hasTest = false;
             var explosions = false;
@@ -134,12 +135,14 @@ function doString(input, verbose) {
                     }
                     current_flag = c;
                     flag_dict[c] = 0;
+                    flag_display.push(c);
                 }
             });
 
             if (type == "b" && !hasTest) {
                 // If it's a binomial test but we don't have a condition, set default
                 flag_dict[">"] = sides;
+                flag_display.push(">");
             }
 
             if (explosions) {
@@ -188,7 +191,7 @@ function doString(input, verbose) {
                 }
                 if (explosions) {
                     if (r.roll >= flag_dict["x"]) {
-/*                        console.log(`Bonus! ${r.roll} >= ${flag_dict["x"]}`);*/
+                        /*                        console.log(`Bonus! ${r.roll} >= ${flag_dict["x"]}`);*/
                         // Explosion!
                         bonuses++;
                         next_is_bonus = true;
@@ -371,9 +374,10 @@ function doString(input, verbose) {
             }
 
             tmp_flags = "";
-            for (const [k, v] of Object.entries(flag_dict)) {
-                tmp_flags += k + v;
-            }
+            flag_display.forEach(k => {
+                tmp_flags += k + flag_dict[k];
+            });
+            //            for (const [k, v] of Object.entries(flag_dict)) {
 
             out.terms.push(
                 signedInt(subtotal)
