@@ -82,6 +82,9 @@ function doString(input, verbose) {
             }
         } else if (matches.length > 0) {
             var count = parseInt(matches[0].groups["dicecount"]);
+            if (!count) {
+                count = 1;
+            }
             var type = matches[0].groups["dietype"];
             var sides = parseInt(matches[0].groups["dicesides"]);
             var flag_chararray = [...matches[0].groups["flags"]];
