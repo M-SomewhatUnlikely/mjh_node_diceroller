@@ -245,23 +245,25 @@ function doString(input, verbose) {
                     }
                 }
                 if ("HLhldx".includes(k)) {
-                    out.warnings.push("Ingoring not yet implemented flag " + k + ". Tell Matthew you need it.");
+                    out.warnings.push("Ignoring not yet implemented flag " + k + ". Tell Matthew you need it.");
                 }
             }
 
             var subtotal = 0;
             for (var i = 0; i < count; i++) {
-                var roll = randInt(sides);
-                rolls.push(roll);
+                rolls.push({
+                    roll: randInt(sides),
+                    format: "",
+                });
             }
 
             switch (type) {
                 case "d":
                     rolls.forEach(r => {
                         if (sign == "+") {
-                            subtotal += parseInt(r);
+                            subtotal += parseInt(r.roll);
                         } else {
-                            subtotal -= r;
+                            subtotal -= r.roll;
                         }
                     });
                     break;
@@ -270,31 +272,50 @@ function doString(input, verbose) {
                     rolls.forEach(r => {
                         if (">" in flag_dict) {
                             // If we're checking at least
-                            if (r >= flag_dict[">"]) { subtotal++; }
-                            if ("<" in flag_dict && r <= flag_dict["<"]) {
+                            if (r.roll >= flag_dict[">"]) {
+                                r.format = "**";
+                                subtotal++;
+                            }
+                            if ("<" in flag_dict && r.roll <= flag_dict["<"]) {
                                 // If we're _also_ checking at most, penalise
+                                r.format = "~~";
                                 subtotal--;
                             }
                         } else {
                             // not checking >
-                            if ("<" in flag_dict && r <= flag_dict["<"]) {
+                            if ("<" in flag_dict && r.roll <= flag_dict["<"]) {
                                 // So credit < positively
+                                r.format = "**";
                                 subtotal++;
                             }
                         }
                         // In either case, credit =
-                        if ("=" in flag_dict && r == flag_dict["="]) { subtotal++; }
+                        if ("=" in flag_dict && r.roll == flag_dict["="]) {
+                            r.format = "**";
+                            subtotal++;
+                        }
                     });
                     break;
                 case "h":
+                    // TODO: Make h and l respect sign
                     rolls.forEach(r => {
-                        if (r > subtotal) { subtotal = r; }
+                        if (r.roll > subtotal) { subtotal = r.roll; }
+                    });
+                    rolls.forEach(r => {
+                        if (r.roll == subtotal) {
+                            r.format = "**";
+                        }
                     });
                     break;
                 case "l":
                     rolls.forEach(r => {
-                        if (r < subtotal) { subtotal = r; }
-                    })
+                        if (r.roll < subtotal) { subtotal = r.roll; }
+                    });
+                    rolls.forEach(r => {
+                        if (r.roll == subtotal) {
+                            r.format = "**";
+                        }
+                    });
                     break;
                 default:
                     out.warnings.push("Ignoring " + type + " term, because it's not yet implemented. Tell Matthew you need it.");
@@ -309,7 +330,7 @@ function doString(input, verbose) {
                 signedInt(subtotal) + (type == "b" ? " success" + plurales(subtotal) : "")
                 + " (" + sign + count + type + sides + tmp_flags
                 + (verbose
-                    ? ": [" + rolls.join(",") + "]"
+                    ? ": [" + rolls.map(r => r.format + r.roll + r.format).join(",") + "]"
                     : "")
                 + ")"
             );
@@ -322,7 +343,7 @@ function doString(input, verbose) {
     });
 
     if (allTypes.length > 1) {
-        out.warnings.push(`You have a mixture of die types (${allTypes.join("")}). This is unusual, because they don't normally add.'`);
+        out.warnings.push(`You have a mixture of die types (${allTypes.join("")}). This is unusual, because they don't normally add.`);
     }
 
     out.summary = `**${out.total}**: ${out.terms.join(" ")}`;
