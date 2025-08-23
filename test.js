@@ -9,6 +9,8 @@ var p = require("./src/index.js").parse;
     "5d8L2",
     "6h6l2",
     "7h6c3",
+    "4h6c1d",
+    "20h6d"
  //   "h",
  //   "roadmap"
 ].forEach(s => {

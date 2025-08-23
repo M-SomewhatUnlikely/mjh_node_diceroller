@@ -1,118 +1,20 @@
-const flags = [
-    {
-        keys: [">"],
-        help: ">`m` - Turns the dice into a success test (type b), returning the number"
-            + " of dice that are at least (**not** strictly greater than) `m` (default max).",
-        default: "s",
-    },
-    {
-        keys: ["<"],
-        help: "<`m` - Turns the dice into a success test (type b), returning the number"
-            + " of dice that are at most (**not** strictly less than) `m` (default 1)."
-            + " If > is also in use, < will _remove_ successes, so that you can do oWoD botches.",
-        default: 1,
-    },
-    {
-        keys: ["="],
-        help: "=`m` - Turns the dice into a success test (type b), returning the number"
-            + " of dice that are equal to `m` (default max).",
-        default: "s",
-    },
-    {
-        nyi: true,
-        keys: ["x"],
-        help: "x`m` - NYI: Dice explode, adding an extra die for each max score. Limited to `m` bonus per die (default 10k).",
-        default: 10000,
-    },
-    {
-        nyi: true,
-        keys: ["X"],
-        help: "X`m` - NYI: Dice explode, adding an extra die for each score of `m` or more (default max)."
-            + " Combine X and x to specify the explosion threshold and a limit, respectively.",
-        default: "s",
-    },
-    {
-        keys: ["H"],
-        help: "H`m` - NYI: Keep the highest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
-        default: 1,
-    },
-    {
-        keys: ["L"],
-        help: "L`m` - NYI: Keep the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
-        default: 1,
-    },
-    {
-        keys: ["h"],
-        help: "h`m` - NYI: Remove the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
-        default: 1,
-    },
-    {
-        keys: ["l", "c"],
-        help: "l`m` or c`m` - NYI: 'Cut': Remove the highest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
-        default: 1,
-    },
-    {
-        nyi: true,
-        keys: ["d"],
-        help: "d`m` - NYI: Make a fuss if there are doubles (by default).",
-        default: 1,
-    },
-];
+const config = require("./config.js");
 
 const flag_by_key = {};
-flags.forEach(f => {
+config.flags.forEach(f => {
     f.keys.forEach(k => {
         flag_by_key[k] = f;
     });
 });
 
-const dietypes = [
-    {
-        keys: ["d"],
-        help: "`n`d`s` - Report the total/sum of `n` normal dice of `s` sides each."
-    },
-    {
-        keys: ["b"],
-        help: "`n`b`s` - Report how many of `n`d`s` meed the success condition: use <, > or = flags (default >`s`)."
-            + " Note that 'd' also supports those flags for compatibility, so this is almost an alias."
-    },
-    {
-        keys: ["h"],
-        help: "`n`h`s` - `n` dice, reporting only the highest score."
-            + " Note that 3h6c2 reports highest score after cut2, but 3d6c2H1 might not do the flags in the right order."
-    },
-    {
-        keys: ["l"],
-        help: "`n`l`s` - `n` dice, reporting only the lowest score."
-    },
-];
-
-const commands = [
-    //{
-    //    keys: ["v", "verbose"],
-    //    run: args => doString(args.join(" "), true),
-    //    help: "`v <dicestring>` - verbose: return slightly more result information."
-    //},
-    {
-        keys: ["h", "help"],
-        run: args => getHelp(false),
-        help: "`h` - this help."
-    },
-    {
-        keys: ['roadmap'],
-        run: args => getHelp(true),
-        help: "`roadmap` - the help, including things that are not yet implemented (NYI)."
-    }
-];
-
 var pattern_dicetypes = "";
-dietypes.forEach(t => {
+config.dietypes.forEach(t => {
     t.keys.forEach(k => {
         pattern_dicetypes += k;
     });
 });
 var pattern_flags = "";
-flags.forEach(f => {
+config.flags.forEach(f => {
     f.keys.forEach(k => {
         pattern_flags += k;
     });
@@ -159,6 +61,7 @@ function doString(input, verbose) {
         errors: [],
         warnings: [],
         terms: [],
+        freq_fuss: "",
     }
 
     var allTypes = [];
@@ -240,7 +143,7 @@ function doString(input, verbose) {
                         flag_dict[k] = flag_by_key[k].default;
                     }
                 }
-                if ("dx".includes(k)) {
+                if ("x".includes(k)) {
                     out.warnings.push("Ignoring not yet implemented flag " + k + ". Tell Matthew you need it.");
                 }
             }
@@ -254,11 +157,10 @@ function doString(input, verbose) {
                 });
             }
 
+            // Keeping and dropping
             var sorted = rolls.map(r => r.roll);
             sorted.sort();
-            const cacheSorted = [...sorted];
             var ignored = [];
-
 
             var toRemove = 0;
             // H - remove lowest n-m
@@ -315,9 +217,6 @@ function doString(input, verbose) {
             }
 
             if (ignored.length > 0) {
-                console.log(cacheSorted);
-                console.log(sorted);
-                console.log(ignored);
                 rolls.forEach(r => {
                     if (ignored.includes(r.roll)) {
                         r.ignore = true;
@@ -325,6 +224,38 @@ function doString(input, verbose) {
                         ignored.splice(ignored.indexOf(r.roll), 1);
                     }
                 });
+            }
+
+
+            // Counting frequency
+            if ("d" in flag_dict) {
+                var freq = {};
+                var max_freq = 0;
+                rolls.forEach(r => {
+                    if (!r.ignore) {
+                        if (!(r.roll in freq)) {
+                            freq[r.roll] = 0;
+                        }
+                        freq[r.roll]++;
+                        if (freq[r.roll] > max_freq) {
+                            max_freq = freq[r.roll];
+                        }
+                    }
+                });
+                console.log(freq);
+                switch (max_freq) {
+                    case 1:
+                        break;
+                    case 2:
+                        out.freq_fuss = "with a double";
+                        break;
+                    case 3:
+                        out.freq_fuss = "with a triple";
+                        break;
+                    default:
+                        out.freq_fuss = "with a set of " + max_freq;
+                        break;
+                }
             }
 
             switch (type) {
@@ -401,7 +332,9 @@ function doString(input, verbose) {
             }
 
             out.terms.push(
-                signedInt(subtotal) + (type == "b" ? " success" + plurales(subtotal) : "")
+                signedInt(subtotal)
+                + (type == "b" ? " success" + plurales(subtotal) : "")
+                + (out.freq_fuss ? " " + out.freq_fuss : "")
                 + " (" + sign + count + type + sides + tmp_flags
                 + (verbose
                     ? ": [" + rolls.map(r => r.format + r.roll + r.format).join(",") + "]"
@@ -462,7 +395,7 @@ function parse(input) {
     var args = input.trim().split(" ");
 
     // Check the first argument against the flags of all the commands
-    for (const t of commands) {
+    for (const t of config.commands) {
         if (t.keys.includes(args[0])) {
             if (t.run) {
                 return t.run(args.slice(1));
