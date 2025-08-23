@@ -5,8 +5,9 @@ var p = require("./src/index.js").parse;
     "2d8 - 3d4 + 5",
     "2d6x3>5",
     "2r4",
-    "2h4>2",
-    "2d6 + 2h6"
+    "5h6c2",
+    "2d6 + 2h6",
+    "4d6H3",
  //   "h",
  //   "roadmap"
 ].forEach(s => {
@@ -18,4 +19,5 @@ var p = require("./src/index.js").parse;
     if (data.help) {
         console.log("\n" + data.help);
     }
+    console.log("\n");
 });

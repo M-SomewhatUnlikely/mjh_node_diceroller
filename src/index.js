@@ -244,7 +244,7 @@ function doString(input, verbose) {
                         flag_dict[k] = flag_by_key[k].default;
                     }
                 }
-                if ("HLhldx".includes(k)) {
+                if ("dx".includes(k)) {
                     out.warnings.push("Ignoring not yet implemented flag " + k + ". Tell Matthew you need it.");
                 }
             }
@@ -254,65 +254,142 @@ function doString(input, verbose) {
                 rolls.push({
                     roll: randInt(sides),
                     format: "",
+                    ignore: false,
+                });
+            }
+
+            var sorted = rolls.map(r => r.roll);
+            sorted.sort();
+            const cacheSorted = [...sorted];
+            var ignored = [];
+
+            // H - remove lowest n-m
+            // h - remove lowest m
+            // L - remove highest n-m
+            // l, c - remove highest m
+
+            var toRemove = 0;
+            if ("H" in flag_dict) {
+                toRemove = count - flag_dict["H"];
+                if (toRemove >= sorted.length) {
+                    out.warnings.push("Ignoring flag H" + flag_dict["H"] + " because it would remove all the dice.");
+                } else {
+                    ignored = sorted.slice(0, toRemove);
+                    sorted = sorted.slice(toRemove);
+                }
+            }
+            if ("h" in flag_dict) {
+                toRemove = flag_dict["h"];
+                if (toRemove >= sorted.length) {
+                    out.warnings.push("Ignoring flag h" + flag_dict["h"] + " because it would remove all the dice.");
+                } else {
+                    ignored = sorted.slice(0, toRemove);
+                    sorted = sorted.slice(toRemove);
+                }
+            }
+            if ("L" in flag_dict) {
+                toRemove = count - flag_dict["L"];
+                if (toRemove >= sorted.length) {
+                    out.warnings.push("Ignoring flag L" + flag_dict["L"] + " because it would remove all the dice.");
+                } else {
+                    ignored = sorted.slice(toRemove + 1);
+                    sorted = sorted.slice(0, toRemove + 1);
+                }
+            }
+            if ("l" in flag_dict) {
+                toRemove = flag_dict["l"];
+                if (toRemove >= sorted.length) {
+                    out.warnings.push("Ignoring flag l" + flag_dict["l"] + " because it would remove all the dice.");
+                } else {
+                    ignored = sorted.slice(toRemove + 1);
+                    sorted = sorted.slice(0, toRemove + 1);
+                }
+            }
+            if ("c" in flag_dict) {
+                toRemove = flag_dict["c"];
+                if ("l" in flag_dict) {
+                    out.warnings.push("Ignoring flag c because you've also used l and they're aliases. Please use one or the other.");
+                } else if (toRemove >= sorted.length) {
+                    out.warnings.push("Ignoring flag c" + flag_dict["c"] + " because it would remove all the dice.");
+                } else {
+                    ignored = sorted.slice(toRemove + 1);
+                    sorted = sorted.slice(0, toRemove + 1);
+                }
+            }
+
+            if (ignored.length > 0) {
+                console.log(cacheSorted);
+                console.log(sorted);
+                console.log(ignored);
+                rolls.forEach(r => {
+                    if (ignored.includes(r.roll)) {
+                        r.ignore = true;
+                        r.format = "~~";
+                        ignored.splice(ignored.indexOf(r.roll), 1);
+                    }
                 });
             }
 
             switch (type) {
                 case "d":
                     rolls.forEach(r => {
-                        if (sign == "+") {
-                            subtotal += parseInt(r.roll);
-                        } else {
-                            subtotal -= r.roll;
+                        if (!r.ignore) {
+                            if (sign == "+") {
+                                subtotal += parseInt(r.roll);
+                            } else {
+                                subtotal -= r.roll;
+                            }
                         }
                     });
                     break;
                 case "b":
                     out.result
                     rolls.forEach(r => {
-                        if (">" in flag_dict) {
-                            // If we're checking at least
-                            if (r.roll >= flag_dict[">"]) {
+                        if (!r.ignore) {
+                            if (">" in flag_dict) {
+                                // If we're checking at least
+                                if (r.roll >= flag_dict[">"]) {
+                                    r.format = "**";
+                                    subtotal++;
+                                }
+                                if ("<" in flag_dict && r.roll <= flag_dict["<"]) {
+                                    // If we're _also_ checking at most, penalise
+                                    r.format = "~~";
+                                    subtotal--;
+                                }
+                            } else {
+                                // not checking >
+                                if ("<" in flag_dict && r.roll <= flag_dict["<"]) {
+                                    // So credit < positively
+                                    r.format = "**";
+                                    subtotal++;
+                                }
+                            }
+                            // In either case, credit =
+                            if ("=" in flag_dict && r.roll == flag_dict["="]) {
                                 r.format = "**";
                                 subtotal++;
                             }
-                            if ("<" in flag_dict && r.roll <= flag_dict["<"]) {
-                                // If we're _also_ checking at most, penalise
-                                r.format = "~~";
-                                subtotal--;
-                            }
-                        } else {
-                            // not checking >
-                            if ("<" in flag_dict && r.roll <= flag_dict["<"]) {
-                                // So credit < positively
-                                r.format = "**";
-                                subtotal++;
-                            }
-                        }
-                        // In either case, credit =
-                        if ("=" in flag_dict && r.roll == flag_dict["="]) {
-                            r.format = "**";
-                            subtotal++;
                         }
                     });
                     break;
                 case "h":
                     // TODO: Make h and l respect sign
                     rolls.forEach(r => {
-                        if (r.roll > subtotal) { subtotal = r.roll; }
+                        if (!r.ignore && r.roll > subtotal) { subtotal = r.roll; }
                     });
                     rolls.forEach(r => {
-                        if (r.roll == subtotal) {
+                        if (!r.ignore && r.roll == subtotal) {
                             r.format = "**";
                         }
                     });
                     break;
                 case "l":
                     rolls.forEach(r => {
-                        if (r.roll < subtotal) { subtotal = r.roll; }
+                        if (!r.ignore && r.roll < subtotal) { subtotal = r.roll; }
                     });
                     rolls.forEach(r => {
-                        if (r.roll == subtotal) {
+                        if (!r.ignore && r.roll == subtotal) {
                             r.format = "**";
                         }
                     });
