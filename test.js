@@ -13,7 +13,7 @@ var p = require("./src/index.js").parse;
     "20h6d",
     "5d6x",
     "6d6x5",
-    "d10x"
+    "16+d10x"
  //   "h",
  //   "roadmap"
 ].forEach(s => {

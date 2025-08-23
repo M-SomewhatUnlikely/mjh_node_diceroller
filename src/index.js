@@ -20,7 +20,7 @@ config.flags.forEach(f => {
     });
 });
 
-const re_constant = new RegExp("^\\d$", "g");
+const re_constant = new RegExp("^\\d+$", "g");
 const re_diceterm = new RegExp("^(?<dicecount>\\d*)(?<dietype>[" + pattern_dicetypes + "])(?<dicesides>\\d+)(?<flags>([><=\\w]\\d*)*)$", "g");
 
 function randInt(inclusiveMax) {
