@@ -32,25 +32,21 @@ const flags = [
         default: "s",
     },
     {
-        nyi: true,
         keys: ["H"],
         help: "H`m` - NYI: Keep the highest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
         default: 1,
     },
     {
-        nyi: true,
         keys: ["L"],
         help: "L`m` - NYI: Keep the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
         default: 1,
     },
     {
-        nyi: true,
         keys: ["h"],
         help: "h`m` - NYI: Remove the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
         default: 1,
     },
     {
-        nyi: true,
         keys: ["l", "c"],
         help: "l`m` or c`m` - NYI: 'Cut': Remove the highest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
         default: 1,
@@ -263,12 +259,9 @@ function doString(input, verbose) {
             const cacheSorted = [...sorted];
             var ignored = [];
 
-            // H - remove lowest n-m
-            // h - remove lowest m
-            // L - remove highest n-m
-            // l, c - remove highest m
 
             var toRemove = 0;
+            // H - remove lowest n-m
             if ("H" in flag_dict) {
                 toRemove = count - flag_dict["H"];
                 if (toRemove >= sorted.length) {
@@ -278,6 +271,7 @@ function doString(input, verbose) {
                     sorted = sorted.slice(toRemove);
                 }
             }
+            // h - remove lowest m
             if ("h" in flag_dict) {
                 toRemove = flag_dict["h"];
                 if (toRemove >= sorted.length) {
@@ -287,24 +281,27 @@ function doString(input, verbose) {
                     sorted = sorted.slice(toRemove);
                 }
             }
+            // L - remove highest n-m
             if ("L" in flag_dict) {
                 toRemove = count - flag_dict["L"];
                 if (toRemove >= sorted.length) {
                     out.warnings.push("Ignoring flag L" + flag_dict["L"] + " because it would remove all the dice.");
                 } else {
-                    ignored = sorted.slice(toRemove + 1);
-                    sorted = sorted.slice(0, toRemove + 1);
+                    ignored = sorted.slice(-toRemove);
+                    sorted = sorted.slice(0, -toRemove);
                 }
             }
+            // l, c - remove highest m
             if ("l" in flag_dict) {
                 toRemove = flag_dict["l"];
                 if (toRemove >= sorted.length) {
                     out.warnings.push("Ignoring flag l" + flag_dict["l"] + " because it would remove all the dice.");
                 } else {
-                    ignored = sorted.slice(toRemove + 1);
-                    sorted = sorted.slice(0, toRemove + 1);
+                    ignored = sorted.slice(-toRemove);
+                    sorted = sorted.slice(0, -toRemove);
                 }
             }
+            // l, c - remove highest m
             if ("c" in flag_dict) {
                 toRemove = flag_dict["c"];
                 if ("l" in flag_dict) {
@@ -312,8 +309,8 @@ function doString(input, verbose) {
                 } else if (toRemove >= sorted.length) {
                     out.warnings.push("Ignoring flag c" + flag_dict["c"] + " because it would remove all the dice.");
                 } else {
-                    ignored = sorted.slice(toRemove + 1);
-                    sorted = sorted.slice(0, toRemove + 1);
+                    ignored = sorted.slice(-toRemove);
+                    sorted = sorted.slice(0, -toRemove);
                 }
             }
 
