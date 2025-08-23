@@ -92,11 +92,11 @@ const dietypes = [
 ];
 
 const commands = [
-    {
-        keys: ["v", "verbose"],
-        run: args => doString(args.join(" "), true),
-        help: "`v <dicestring>` - verbose: return slightly more result information."
-    },
+    //{
+    //    keys: ["v", "verbose"],
+    //    run: args => doString(args.join(" "), true),
+    //    help: "`v <dicestring>` - verbose: return slightly more result information."
+    //},
     {
         keys: ["h", "help"],
         run: args => getHelp(false),
@@ -402,7 +402,7 @@ function parse(input) {
         }
     }
     // None of the types matched the first argument: try the whole string
-    return doString(args.join(" "), false);
+    return doString(args.join(" "), true);
 }
 
 module.exports = {
