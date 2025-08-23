@@ -19,42 +19,47 @@ module.exports.flags = [
         default: "s",
     },
     {
-        nyi: true,
         keys: ["x"],
-        help: "x`m` - NYI: Dice explode, adding an extra die for each max score. Limited to `m` bonus per die (default 10k).",
+        help: "x`m` - NYI: Dice explode, adding an extra die for each score of `m` or more (default max)."
+            + " Combine with X to put a limit on how many explosions.",
+        default: "s",
+    },
+    {
+        keys: ["X"],
+        help: "X`m` - NYI: Dice explode, adding an extra die for each max score (or combine with 'x')."
+            + " Limited to `m` bonus per die (default 10k).",
         default: 10000,
     },
     {
         nyi: true,
-        keys: ["X"],
-        help: "X`m` - NYI: Dice explode, adding an extra die for each score of `m` or more (default max)."
-            + " Combine X and x to specify the explosion threshold and a limit, respectively.",
-        default: "s",
+        keys: ["s"],
+        help: "s`m` - NYI: Dice explode, but in Shadowrun style, rerolling this die and adding `m` to its score."
+            + " Default floor(max/2). Combine with 'x' to set the threshold; ignores 's'.",
+        default: "s/2",
     },
     {
         keys: ["H"],
-        help: "H`m` - NYI: Keep the highest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
+        help: "H`m` - Keep the highest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
         default: 1,
     },
     {
         keys: ["L"],
-        help: "L`m` - NYI: Keep the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
+        help: "L`m` - Keep the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
         default: 1,
     },
     {
         keys: ["h"],
-        help: "h`m` - NYI: Remove the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
+        help: "h`m` - Remove the lowest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
         default: 1,
     },
     {
         keys: ["l", "c"],
-        help: "l`m` or c`m` - NYI: 'Cut': Remove the highest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
+        help: "l`m` or c`m` - 'Cut': Remove the highest `m` dice (default 1). This is done before counting doubles or other distribution checking.",
         default: 1,
     },
     {
-        nyi: true,
         keys: ["d"],
-        help: "d`m` - NYI: Make a fuss if there are doubles (by default).",
+        help: "d`m` - Make a fuss if there are doubles (by default).",
         default: 1,
     },
 ];
@@ -81,11 +86,6 @@ module.exports.dietypes = [
 ];
 
 module.exports.commands = [
-    //{
-    //    keys: ["v", "verbose"],
-    //    run: args => doString(args.join(" "), true),
-    //    help: "`v <dicestring>` - verbose: return slightly more result information."
-    //},
     {
         keys: ["h", "help"],
         run: args => getHelp(false),

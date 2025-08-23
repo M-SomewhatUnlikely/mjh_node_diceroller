@@ -81,9 +81,9 @@ function doString(input, verbose) {
                 out.total -= parseInt(core);
             }
         } else if (matches.length > 0) {
-            var count = matches[0].groups["dicecount"];
+            var count = parseInt(matches[0].groups["dicecount"]);
             var type = matches[0].groups["dietype"];
-            var sides = matches[0].groups["dicesides"];
+            var sides = parseInt(matches[0].groups["dicesides"]);
             var flag_chararray = [...matches[0].groups["flags"]];
 
             if (!allTypes.includes(type)) {
@@ -96,6 +96,7 @@ function doString(input, verbose) {
             var flag_dict = {}
             var current_flag = "";
             var hasTest = false;
+            var explosions = false;
             flag_chararray.forEach(c => {
                 if (current_flag) {
                     // There is a flag being considered already
@@ -124,6 +125,10 @@ function doString(input, verbose) {
                         }
                         hasTest = true;
                     }
+                    if ("xX".includes(c)) {
+                        // Explosion flags
+                        explosions = true;
+                    }
                     current_flag = c;
                     flag_dict[c] = 0;
                 }
@@ -131,30 +136,64 @@ function doString(input, verbose) {
 
             if (type == "b" && !hasTest) {
                 // If it's a binomial test but we don't have a condition, set default
-                flag_dict[">"] = size;
+                flag_dict[">"] = sides;
+            }
+
+            if (explosions) {
+                // If explosions are on, set zeros for missing X and x (not s):
+                ["x", "X"].forEach(c => {
+                    if (!(c in flag_dict)) {
+                        flag_dict[c] = 0;
+                    }
+                });
             }
 
             // Set defaults for flags with 0 value
             for (const [k, v] of Object.entries(flag_dict)) {
                 if (v == 0) {
                     if (flag_by_key[k].default == "s") {
-                        flag_dict[k] = size;
+                        flag_dict[k] = sides;
+                    } else if (flag_by_key[k].default == "s/2") {
+                        flag_dict[k] = math.floor(sides / 2);
                     } else {
                         flag_dict[k] = flag_by_key[k].default;
                     }
                 }
-                if ("x".includes(k)) {
+                if ("s".includes(k)) {
                     out.warnings.push("Ignoring not yet implemented flag " + k + ". Tell Matthew you need it.");
                 }
             }
 
             var subtotal = 0;
-            for (var i = 0; i < count; i++) {
-                rolls.push({
+            var i = 0;
+            var bonuses = 0;
+            var max_bonuses = 0;
+            var next_is_bonus = false;
+            if (explosions) {
+                max_bonuses = flag_dict["X"];
+            }
+            while (i < count + bonuses && bonuses <= max_bonuses) {
+                var r = {
                     roll: randInt(sides),
                     format: "",
                     ignore: false,
-                });
+                }
+                if (next_is_bonus) {
+                    r.bonus = true;
+                    r.format = "_";
+                    next_is_bonus = false;
+                }
+                if (explosions) {
+                    if (r.roll >= flag_dict["x"]) {
+/*                        console.log(`Bonus! ${r.roll} >= ${flag_dict["x"]}`);*/
+                        // Explosion!
+                        bonuses++;
+                        next_is_bonus = true;
+                    }
+                }
+                rolls.push(r);
+                //console.log(`${i}: r.roll = ${r.roll}, count = ${count}, bonuses = ${bonuses}, c+b = ${count + bonuses}`);
+                i++;
             }
 
             // Keeping and dropping
@@ -258,6 +297,8 @@ function doString(input, verbose) {
                 }
             }
 
+
+            // Big switch for dice types
             switch (type) {
                 case "d":
                     rolls.forEach(r => {
